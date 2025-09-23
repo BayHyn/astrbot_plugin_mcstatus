@@ -18,7 +18,7 @@ class Draw:
             
             font = None
             font_paths = [
-                "data/plugins/astrbot_plugin_mcstatus/cute_font.ttf",
+                "data/plugins/astrbot_plugin_mcstatus/assess/cute_font.ttf",
                 "simhei.ttf",
                 "msyh.ttc",
                 # Linux系统常用字体路径
