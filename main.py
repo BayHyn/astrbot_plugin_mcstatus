@@ -79,7 +79,7 @@ class mcstatus(Star):
 
 
     @filter.command("motd")
-    async def motd(self, event: AstrMessageEvent,server_addr: str):
+    async def motd(self, event: AstrMessageEvent, server_addr: str):
         """获取JE服务器MOTD"""
         if server_addr is not None:
             server_status = await self.get_server_status(server_addr)
@@ -114,14 +114,14 @@ class mcstatus(Star):
             server_name = command_text_a
             server_addr = command_text_b
             if self.datamanager.add_server_addr(server_name,server_addr):
-                yield event.plain_result("✅添加成功")
+                yield event.plain_result(f"✅服务器{server_name} 添加成功！")
             else:
                 yield event.plain_result("❌添加失败，发生内部错误")
         elif(subcommand == "del"):
             if command_text_a is not None:
                 server_name = command_text_a
                 if self.datamanager.remove_server_addr(server_name):
-                    yield event.plain_result("✅删除成功")
+                    yield event.plain_result(f"✅服务器{server_name} 删除成功！")
                 else:
                     yield event.plain_result("❌删除失败，发生内部错误")
             else:
@@ -155,10 +155,10 @@ class mcstatus(Star):
         elif(subcommand == "list"):
             data = self.datamanager.get_all_configs()
             if data is not None:
-                result = "✅已存储服务器："
+                result = "✅已存储服务器：\n"
                 cnt = 1
                 for key in data:
-                    result+=f"{cnt}.{key}: {data[key]}"
+                    result+=f"{cnt}.{key}: {data[key]}\n"
                     cnt += 1
                 yield event.plain_result(result)
             else:
@@ -179,12 +179,17 @@ class mcstatus(Star):
             yield event.plain_result("❌无相关指令，请输入/mcstatus help查询")
 
     @filter.command("draw")
-    async def draw(self,event: AstrMessageEvent):
+    async def draw(self, event: AstrMessageEvent, message: str = None):
         """
         绘图命令（测试）
         """
         drawing = Draw()
-        drawing.create_image_with_text("1111")
+        if message is None:
+            drawing.create_image_with_text(text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~")
+            event.image_result(f"{drawing.output}")
+            return
+        
+        drawing.create_image_with_text(text = message)
         yield event.image_result(f"{drawing.output}")
 
 
