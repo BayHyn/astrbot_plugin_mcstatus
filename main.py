@@ -5,7 +5,7 @@ from .core.data_manager import DataManager
 from .core.draw import Draw
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
-import re
+import re,os
 
 plguin_version = "1.0.0"
 
@@ -183,14 +183,20 @@ class mcstatus(Star):
         """
         绘图命令（测试）
         """
-        drawing = Draw()
         if message is None:
-            drawing.create_image_with_text(text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~")
-            event.image_result(f"{drawing.output}")
-            return
+            final_text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~"
+        else:
+            final_text = str(message).strip()
+            if final_text == "":
+                final_text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~"
         
-        drawing.create_image_with_text(text = message)
-        yield event.image_result(f"{drawing.output}")
+        drawing = Draw()
+        drawing.create_image_with_text(final_text)
+        
+        if os.path.exists(drawing.output):
+            yield event.image_result(drawing.output)
+        else:
+            yield event.plain_result("图片生成失败，请检查日志")
 
 
     async def terminate(self):
