@@ -140,12 +140,15 @@ class mcstatus(Star):
 
         elif(subcommand == "list"):
             data = self.datamanager.get_all_configs()
-            result = "✅已存储服务器："
-            cnt = 1
-            for key in data:
-                result+=f"{cnt}.{key}: {data[key]}"
-                cnt += 1
-            yield event.plain_result(result)
+            if data is not None:
+                result = "✅已存储服务器："
+                cnt = 1
+                for key in data:
+                    result+=f"{cnt}.{key}: {data[key]}"
+                    cnt += 1
+                yield event.plain_result(result)
+            else:
+                yield event.plain_result("🐸暂无存储服务器，请用/mcstatus add添加")
                 
 
         elif(subcommand == "help"):
