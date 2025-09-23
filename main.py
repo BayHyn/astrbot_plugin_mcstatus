@@ -1,4 +1,5 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+from astrbot.api import AstrBotConfig
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from .core.data_manager import DataManager
@@ -11,8 +12,9 @@ plguin_version = "1.0.0"
 
 @register("mcstatus", "WhiteCloudCN", "一个获取MC服务器状态的插件", plguin_version)
 class mcstatus(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
+        self.config = config
         self.datamanager = DataManager()
         self.datamanager.load_config()
     
@@ -191,7 +193,7 @@ class mcstatus(Star):
                 final_text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~"
         
         drawing = Draw()
-        drawing.create_image_with_text(final_text)
+        drawing.create_image_with_text(final_text,seted_font=self.config["font"])
         
         if os.path.exists(drawing.output):
             yield event.image_result(drawing.output)

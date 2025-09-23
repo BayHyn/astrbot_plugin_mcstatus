@@ -10,7 +10,8 @@ class Draw:
     def create_image_with_text(self,
                                text: str,
                                background_path: str = "data/plugins/astrbot_plugin_mcstatus/assess/bg.jpg",
-                               output_path: str = "data/whitecloudcn_plugins_data/draw_temp.jpg"):
+                               output_path: str = "data/whitecloudcn_plugins_data/draw_temp.jpg",
+                               seted_font: str = "cute_font.ttf"):
         try:
             background = Image.open(background_path)
             draw = ImageDraw.Draw(background)
@@ -18,7 +19,7 @@ class Draw:
             
             font = None
             font_paths = [
-                "data/plugins/astrbot_plugin_mcstatus/assess/cute_font.ttf",
+                f"data/plugins/astrbot_plugin_mcstatus/assess/{seted_font}",
                 "simhei.ttf",
                 "msyh.ttc",
                 # Linux系统常用字体路径
@@ -37,12 +38,12 @@ class Draw:
             for font_path in font_paths:
                 try:
                     font = ImageFont.truetype(font_path, 40)
-                    logger.info(f"使用字体: {font_path}")
+                    logger.info(f"[mcstatus]使用字体: {font_path}")
                     break
                 except IOError:
                     continue
             if font is None:
-                logger.warning("未找到指定字体，使用默认字体")
+                logger.warning("[mcstatus]未找到指定字体，使用默认字体")
                 font = ImageFont.load_default()
             bbox = draw.textbbox((0, 0), text, font=font)
             text_width = bbox[2] - bbox[0]
@@ -58,6 +59,6 @@ class Draw:
 
             background.save(output_path)
         except FileNotFoundError:
-            logger.error(f"错误: 找不到底图文件 {background_path}")
+            logger.error(f"[mcstatus]错误: 找不到底图文件 {background_path}")
         except Exception as e:
-            logger.error(f"生成图片时出错: {e}")
+            logger.error(f"[mcstatus]生成图片时出错: {e}")

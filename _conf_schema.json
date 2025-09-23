@@ -1,0 +1,8 @@
+{
+    "font": {
+    "description": "绘图字体",
+    "type": "string",
+    "hint": "设置绘图字体，可自定义字体放置于-插件目录/assess/custom_font.ttf",
+    "default": "cute_font.ttf"
+  }
+}
