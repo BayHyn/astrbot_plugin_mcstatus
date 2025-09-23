@@ -21,12 +21,23 @@ class Draw:
                 "data/plugins/astrbot_plugin_mcstatus/cute_font.ttf",
                 "simhei.ttf",
                 "msyh.ttc",
+                # Linux系统常用字体路径
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+                "/usr/share/fonts/truetype/arphic/ukai.ttc",
+                "/usr/share/fonts/truetype/arphic/uming.ttc",
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                "DejaVuSans.ttf",
+                "Arial.ttf",
             ]
             
             for font_path in font_paths:
                 try:
                     font = ImageFont.truetype(font_path, 40)
-                    print(f"使用字体: {font_path}")
+                    logger.info(f"使用字体: {font_path}")
                     break
                 except IOError:
                     continue
