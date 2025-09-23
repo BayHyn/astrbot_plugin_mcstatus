@@ -1,8 +1,8 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
-from .data_manager import DataManager
-from .draw import Draw
+from .core.data_manager import DataManager
+from .core.draw import Draw
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
 import re
