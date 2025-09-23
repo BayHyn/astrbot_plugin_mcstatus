@@ -8,8 +8,8 @@ Author: WhiteCloudCN
 `/mcstatus help/motd/list/add/del/clear 插件主命令`  
 
 # TODO
-❌分群存储
-❌list分页查询
+❌分群存储  
+❌list分页查询  
 
 # 支持
 [帮助文档](https://astrbot.app)
