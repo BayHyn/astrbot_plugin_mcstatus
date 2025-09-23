@@ -2,9 +2,9 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from .data_manager import DataManager
+from .draw import Draw
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
-from PIL import Image, ImageDraw, ImageFont
 import re
 
 plguin_version = "1.0.0"
@@ -15,6 +15,7 @@ class mcstatus(Star):
         super().__init__(context)
         self.datamanager = DataManager()
         self.datamanager.load_config()
+    
 
     @staticmethod
     def check_server_addr(server_addr: str) -> bool:
@@ -177,6 +178,15 @@ class mcstatus(Star):
                                      " └─ clear (删除所有存储服务器，管理员命令)\n")
         else:
             yield event.plain_result("❌无相关指令，请输入/mcstatus help查询")
+
+    @filter.command("draw")
+    async def draw(self,event: AstrMessageEvent):
+        """
+        绘图命令（测试）
+        """
+        drawing = Draw()
+        drawing.create_image_with_text("1111")
+        yield event.image_result(f"{drawing.output}")
 
 
     async def terminate(self):
