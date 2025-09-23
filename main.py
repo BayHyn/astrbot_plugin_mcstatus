@@ -108,7 +108,6 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus motd 服务器地址")
         elif(subcommand == "add"):
-            command_text = command_text.split(' ',1)
             if command_text_a is None or command_text_b is None:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus add [服务器名(任意)] [服务器地址]")
                 return
