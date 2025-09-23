@@ -86,9 +86,13 @@ class DataManager:
             return True
         return False
     
-    def clear_all_configs(self) -> None:
-        self.config_data.clear()
-        self.save_config()
+    def clear_all_configs(self) -> bool:
+        try:
+            self.config_data.clear()
+            self.save_config()
+            return True
+        except:
+            return False
     
     def has_identifier(self, identifier: str) -> bool:
         return identifier in self.config_data

@@ -1,5 +1,5 @@
 # Astrbot Plugin MCStatus
-v1.0.0a
+v1.0.0b
 AstrBot Plugin - MCStatus  
 Author: WhiteCloudCN  
 

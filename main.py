@@ -17,6 +17,7 @@ class mcstatus(Star):
         self.config = config
         self.datamanager = DataManager()
         self.datamanager.load_config()
+        self.admin_list = context.get_config()["admins_id"]
     
 
     @staticmethod
@@ -110,6 +111,7 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus motd 服务器地址")
         elif(subcommand == "add"):
+            """添加{服务器名:服务器地址}"""
             if command_text_a is None or command_text_b is None:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus add [服务器名(任意)] [服务器地址]")
                 return
@@ -120,6 +122,7 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌添加失败，发生内部错误")
         elif(subcommand == "del"):
+            """删除{服务器名:服务器地址}"""
             if command_text_a is not None:
                 server_name = command_text_a
                 if self.datamanager.remove_server_addr(server_name):
@@ -131,6 +134,7 @@ class mcstatus(Star):
         
         # 查询 
         elif(subcommand == "look"):
+            """查询服务器名 返回motd信息"""
             if command_text_a is not None:
                 server_name = command_text_a
                 server_status = await self.get_server_status(self.datamanager.get_server_addr(server_name))
@@ -151,7 +155,7 @@ class mcstatus(Star):
                 yield event.plain_result(f"{server_name}更新成功，新地址为{server_addr}")
                 return
             else:
-                yield event.plain_result(f"{server_name}更新失败，请检查：\n"
+                yield event.plain_result(f"❌{server_name}更新失败，请检查：\n"
                                          f"1.名称是否存在\n"
                                          f"2.地址是否合法")
         elif(subcommand == "list"):
@@ -165,8 +169,14 @@ class mcstatus(Star):
                 yield event.plain_result(result)
             else:
                 yield event.plain_result("🐸暂无存储服务器，请用/mcstatus add添加")
-                
-
+        elif(subcommand == "clear"):
+            if event.get_sender_id() not in self.admin_list:
+                yield event.plain_result(f"❌清空失败，杂鱼({event.get_sender_id})的权限不足还妄想清空呢~")
+                return
+            if self.datamanager.clear_all_configs():
+                yield event.plain_result("✅清空成功")
+            else:
+                yield event.plain_result("❌清空失败，请重试或手动清理")
         elif(subcommand == "help"):
             yield event.plain_result(f"💕MCStatus 插件帮助[v{plguin_version}]\n"
                                      "/motd [服务器地址] (获取服务器MOTD状态信息)\n"
@@ -177,6 +187,7 @@ class mcstatus(Star):
                                      " ├─ add [名称] [服务器地址] (存储新服务器)\n"
                                      " ├─ del [名称] (删除服务器)\n" 
                                      " └─ clear (删除所有存储服务器，管理员命令)\n")
+        
         else:
             yield event.plain_result("❌无相关指令，请输入/mcstatus help查询")
 
