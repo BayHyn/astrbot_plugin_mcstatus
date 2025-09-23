@@ -75,7 +75,6 @@ class DataManager:
             return False
         if not self.check_server_addr(new_server_addr):
             return False
-        
         self.config_data[identifier] = new_server_addr
         self.save_config()
         return True

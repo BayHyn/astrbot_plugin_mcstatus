@@ -4,6 +4,7 @@ from astrbot.api import logger
 from .data_manager import DataManager
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
+from PIL import Image, ImageDraw, ImageFont
 import re
 
 plguin_version = "1.0.0"
@@ -107,7 +108,7 @@ class mcstatus(Star):
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus motd 服务器地址")
         elif(subcommand == "add"):
             command_text = command_text.split(' ',1)
-            if command_text_a is not None and command_text_b is not None:
+            if command_text_a is None or command_text_b is None:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus add [服务器名(任意)] [服务器地址]")
                 return
             server_name = command_text_a
@@ -126,6 +127,7 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus del [服务器名]")
         
+        # 查询 
         elif(subcommand == "look"):
             if command_text_a is not None:
                 server_name = command_text_a
@@ -137,7 +139,19 @@ class mcstatus(Star):
                     yield event.plain_result("❌未找到服务器，请检查服务器地址")
             else:
                 yield event.plain_result("❌格式错误！正确用法：/mcstatus look [服务器名]") 
-
+        elif(subcommand == "set"):
+            if command_text_a is None or command_text_b is None:
+                yield event.plain_result("❌格式错误！正确用法：/mcstatus set [服务器名] [新服务器地址]")
+                return
+            server_name = command_text_a
+            server_addr = command_text_b
+            if self.datamanager.update_server_addr(server_name,server_addr):
+                yield event.plain_result(f"{server_name}更新成功，新地址为{server_addr}")
+                return
+            else:
+                yield event.plain_result(f"{server_name}更新失败，请检查：\n"
+                                         f"1.名称是否存在\n"
+                                         f"2.地址是否合法")
         elif(subcommand == "list"):
             data = self.datamanager.get_all_configs()
             if data is not None:
