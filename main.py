@@ -17,7 +17,9 @@ class mcstatus(Star):
         self.config = config
         self.datamanager = DataManager()
         self.datamanager.load_config()
-        self.admin_list = context.get_config()["admins_id"]
+        self.bot_config = context.get_config()
+        self.admin_list = self.bot_config["admins_id"]
+        
     
 
     @staticmethod
@@ -94,14 +96,14 @@ class mcstatus(Star):
     @filter.command("mcstatus")
     async def mcstatus(self,
                        event: AstrMessageEvent,
-                       subcommand: str,
+                       subcommand: str = None,
                        command_text_a: str = None,
                        command_text_b: str = None):
         """
         插件主函数,子命令motd,add,del,list
         """
-        message = event.message_str
-        
+        if subcommand is None:
+            yield event.plain_result("❌缺少参数，请输入/mcstatus help查询用法")
         if(subcommand == "motd"):
             """获取motd"""
             if command_text_a is not None:
@@ -170,15 +172,16 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("🐸暂无存储服务器，请用/mcstatus add添加")
         elif(subcommand == "clear"):
+            self.admin_list = self.bot_config["admins_id"]
             if event.get_sender_id() not in self.admin_list:
-                yield event.plain_result(f"❌清空失败，杂鱼({event.get_sender_id})的权限不足还妄想清空呢~")
+                yield event.plain_result(f"❌清空失败，杂鱼 {event.get_sender_name()}(id:{event.get_sender_id()}) 的权限不足还妄想清空呢~")
                 return
             if self.datamanager.clear_all_configs():
                 yield event.plain_result("✅清空成功")
             else:
                 yield event.plain_result("❌清空失败，请重试或手动清理")
         elif(subcommand == "help"):
-            yield event.plain_result(f"💕MCStatus 插件帮助[v{plguin_version}]\n"
+             yield event.plain_result(f"💕MCStatus 插件帮助[v{plguin_version}]\n"
                                      "/motd [服务器地址] (获取服务器MOTD状态信息)\n"
                                      "/mcstatus\n"
                                      " ├─ help (获取帮助)\n"
@@ -187,9 +190,8 @@ class mcstatus(Star):
                                      " ├─ add [名称] [服务器地址] (存储新服务器)\n"
                                      " ├─ del [名称] (删除服务器)\n" 
                                      " └─ clear (删除所有存储服务器，管理员命令)\n")
-        
         else:
-            yield event.plain_result("❌无相关指令，请输入/mcstatus help查询")
+            yield event.plain_result("❌无相关指令，请输入/mcstatus help查询用法")
 
     @filter.command("draw")
     async def draw(self, event: AstrMessageEvent, message: str = None):
