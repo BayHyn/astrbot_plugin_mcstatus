@@ -1,21 +1,21 @@
+from astrbot.api import AstrBotConfig, logger
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
-from astrbot.api import AstrBotConfig
-from astrbot.api.star import Context, Star, register
-from astrbot.api import logger
+from astrbot.api.star import Context, Star, StarTools, register
 from .core.data_manager import DataManager
 from .core.draw import Draw
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
 import re,os
 
-plguin_version = "1.0.0"
+plugin_version = "1.0.0"
 
-@register("mcstatus", "WhiteCloudCN", "一个获取MC服务器状态的插件", plguin_version)
+@register("mcstatus", "WhiteCloudCN", "一个获取MC服务器状态的插件", plugin_version)
 class mcstatus(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.config = config
-        self.datamanager = DataManager()
+        plugin_data_dir = StarTools.get_data_dir("mcstatus")
+        self.datamanager = DataManager(config_file=plugin_data_dir / "mcstatus.json")
         self.datamanager.load_config()
         self.bot_config = context.get_config()
         self.admin_list = self.bot_config["admins_id"]
@@ -120,19 +120,12 @@ class mcstatus(Star):
         
         return '\n'.join(result_lines)
 
-    @staticmethod
-    def check_server_addr(server_addr: str) -> bool:
-        if not server_addr or len(server_addr) > 253:
-            return False
-        pattern = r'^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:[1-9][0-9]{0,4}|:[1-5][0-9]{4}|:6[0-4][0-9]{3}|:65[0-4][0-9]{2}|:655[0-2][0-9]|:6553[0-5])?$'
-        return bool(re.match(pattern, server_addr))
-
     async def get_server_status(self, server_addr: str):
         try:
             if ":" not in server_addr:
                 server_addr = f"{server_addr}:25565"
             
-            if not self.check_server_addr(server_addr):
+            if not self.datamanager.check_server_addr(server_addr):
                 return None
             
             server = await JavaServer.async_lookup(server_addr)
@@ -281,7 +274,7 @@ class mcstatus(Star):
                 yield event.plain_result("❌清空失败，请重试或手动清理")
         elif(subcommand == "help"):
              drawing = Draw()
-             await drawing.create_image_with_text(text=f"💕MCStatus 插件帮助[v{plguin_version}]\n"
+             await drawing.create_image_with_text(text=f"💕MCStatus 插件帮助[v{plugin_version}]\n"
                                      "/motd [服务器地址] (获取服务器MOTD状态信息)\n\n"
                                      "/mcstatus\n"
                                      " ├─ help (获取帮助)\n"
@@ -310,9 +303,10 @@ class mcstatus(Star):
         logger.info(f"生成文本图片：{final_text}")
         final_text = self.auto_wrap_text(final_text,20)
         line_count = final_text.count('\n')
+        if line_count==0:
+            line_count+=1
         drawing = Draw()
-        await drawing.create_image_with_text(text=final_text,seted_font=self.config["font"],font_size=60,target_size=(1200,100+60*line_count))
-        if os.path.exists(drawing.output):
+        if (await drawing.create_image_with_text(text=final_text,seted_font=self.config["font"],font_size=60,target_size=(1200,100+60*line_count)))[0]:
             yield event.image_result(drawing.output)
         else:
             yield event.plain_result("图片生成失败，请检查日志")

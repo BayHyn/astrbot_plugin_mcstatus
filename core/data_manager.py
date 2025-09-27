@@ -1,9 +1,13 @@
 from astrbot.api import logger
 import json,os,re
+from astrbot.api.star import StarTools
 from typing import Dict, List, Optional
 
 class DataManager:
-    def __init__(self, config_file: str = "data/whitecloudcn_plugins_data/mcstatus.json"):
+    def __init__(self, config_file: str = None):
+        if config_file is None:
+            plugin_data_dir = StarTools.get_data_dir("mcstatus")
+            config_file=plugin_data_dir / "mcstatus.json"
         self.config_file = config_file
         self.config_data = {}  # 使用字典存储多个标识符的配置
         
@@ -31,7 +35,7 @@ class DataManager:
             logger.info(f"JSON解析错误: {e}")
             return False
         except Exception as e:
-            logger.info(f"加载配置文件时发生错误: {e}")
+            logger.error(f"加载配置文件时发生错误: {e}")
             return False
     
     def save_config(self) -> bool:
@@ -45,7 +49,7 @@ class DataManager:
             return True
             
         except Exception as e:
-            logger.info(f"保存配置文件时发生错误: {e}")
+            logger.error(f"保存配置文件时发生错误: {e}")
             return False
         
     @staticmethod
