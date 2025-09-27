@@ -1,4 +1,4 @@
-name: astrbot_plugin_mcstatus
+name: mcstatus
 desc: 云版MC服务器状态获取
 version: v1.0.0
 author: WhiteCloudCN
