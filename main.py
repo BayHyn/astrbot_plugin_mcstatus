@@ -19,8 +19,106 @@ class mcstatus(Star):
         self.datamanager.load_config()
         self.bot_config = context.get_config()
         self.admin_list = self.bot_config["admins_id"]
+
+    @staticmethod
+    def auto_wrap_text(text, max_chars_per_line, keep_original_newlines=True):
+        """
+        自动换行函数，处理字符串中的普通\n字符并按指定字符数换行
         
-    
+        Args:
+            text: 输入字符串（可能包含普通的\n字符）
+            max_chars_per_line: 每行最大字符数
+            keep_original_newlines: 是否保留原有的\n换行符
+        
+        Returns:
+            处理后的字符串
+        """
+        if not text or max_chars_per_line <= 0:
+            return text
+        
+        result_lines = []
+        
+        if keep_original_newlines:
+            segments = []
+            current_segment = ""
+            i = 0
+            
+            while i < len(text):
+                if i < len(text) - 1 and text[i] == '\\' and text[i+1] == 'n':
+                    if current_segment:
+                        segments.append(current_segment)
+                        current_segment = ""
+                    segments.append("\n")
+                    i += 2
+                else:
+                    current_segment += text[i]
+                    i += 1
+            
+            if current_segment:
+                segments.append(current_segment)
+            
+            current_paragraph = ""
+            for segment in segments:
+                if segment == "\n":
+                    if current_paragraph:
+                        lines = []
+                        current_line = ""
+                        for char in current_paragraph:
+                            if len(current_line) + 1 > max_chars_per_line:
+                                if current_line:
+                                    lines.append(current_line)
+                                current_line = char
+                            else:
+                                current_line += char
+                        if current_line:
+                            lines.append(current_line)
+                        result_lines.extend(lines)
+                        current_paragraph = ""
+                    result_lines.append("")
+                else:
+                    current_paragraph += segment
+            
+            if current_paragraph:
+                lines = []
+                current_line = ""
+                for char in current_paragraph:
+                    if len(current_line) + 1 > max_chars_per_line:
+                        if current_line:
+                            lines.append(current_line)
+                        current_line = char
+                    else:
+                        current_line += char
+                if current_line:
+                    lines.append(current_line)
+                result_lines.extend(lines)
+        
+        else:
+            processed_text = ""
+            i = 0
+            while i < len(text):
+                if i < len(text) - 1 and text[i] == '\\' and text[i+1] == 'n':
+                    processed_text += " "
+                    i += 2
+                else:
+                    processed_text += text[i]
+                    i += 1
+            
+            lines = []
+            current_line = ""
+            for char in processed_text:
+                if len(current_line) + 1 > max_chars_per_line:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = char
+                else:
+                    current_line += char
+            
+            if current_line:
+                lines.append(current_line)
+            
+            result_lines = lines
+        
+        return '\n'.join(result_lines)
 
     @staticmethod
     def check_server_addr(server_addr: str) -> bool:
@@ -104,6 +202,7 @@ class mcstatus(Star):
         """
         if subcommand is None:
             yield event.plain_result("❌缺少参数，请输入/mcstatus help查询用法")
+            return
         if(subcommand == "motd"):
             """获取motd"""
             if command_text_a is not None:
@@ -181,38 +280,43 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌清空失败，请重试或手动清理")
         elif(subcommand == "help"):
-             yield event.plain_result(f"💕MCStatus 插件帮助[v{plguin_version}]\n"
-                                     "/motd [服务器地址] (获取服务器MOTD状态信息)\n"
+             drawing = Draw()
+             await drawing.create_image_with_text(text=f"💕MCStatus 插件帮助[v{plguin_version}]\n"
+                                     "/motd [服务器地址] (获取服务器MOTD状态信息)\n\n"
                                      "/mcstatus\n"
                                      " ├─ help (获取帮助)\n"
                                      " ├─ motd (同/motd)\n"
                                      " ├─ list (显示所有已存储服务器，默认显示第一页)\n"
+                                     " ├─ look (查询服务器名称对应的服务器地址)\n"
                                      " ├─ add [名称] [服务器地址] (存储新服务器)\n"
                                      " ├─ del [名称] (删除服务器)\n" 
-                                     " └─ clear (删除所有存储服务器，管理员命令)\n")
+                                     " └─ clear (删除所有存储服务器，管理员命令)\n",font_size=90,target_size=(1200,620))
+             yield event.image_result(drawing.output)
         else:
             yield event.plain_result("❌无相关指令，请输入/mcstatus help查询用法")
 
     @filter.command("draw")
-    async def draw(self, event: AstrMessageEvent, message: str = None):
+    async def draw(self, event: AstrMessageEvent):
         """
         绘图命令（测试）
         """
-        if message is None:
-            final_text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~"
+        messages = event.message_str.split(' ',1)
+        if len(messages)<2:
+            final_text = "AstrBot Plugin@清蒸云鸭\n未检测到输入字符串！"
         else:
-            final_text = str(message).strip()
+            final_text = messages[1].strip()
             if final_text == "":
-                final_text = "AstrBot Plugin@清蒸云鸭WhiteCloudCN\nDraw Default Message~"
-        
+                final_text = "AstrBot Plugin@清蒸云鸭\n未检测到输入字符串！"
+        logger.info(f"生成文本图片：{final_text}")
+        final_text = self.auto_wrap_text(final_text,20)
+        line_count = final_text.count('\n')
         drawing = Draw()
-        drawing.create_image_with_text(final_text,seted_font=self.config["font"])
-        
+        await drawing.create_image_with_text(text=final_text,seted_font=self.config["font"],font_size=60,target_size=(1200,100+60*line_count))
         if os.path.exists(drawing.output):
             yield event.image_result(drawing.output)
         else:
             yield event.plain_result("图片生成失败，请检查日志")
 
-
+    
     async def terminate(self):
         '''可选择实现 terminate 函数，当插件被卸载/停用时会调用。'''
