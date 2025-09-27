@@ -95,7 +95,8 @@ class DataManager:
             self.config_data.clear()
             self.save_config()
             return True
-        except:
+        except Exception as e:
+            logger.error(f"清除数据失败，错误原因：{e}")
             return False
     
     def has_identifier(self, identifier: str) -> bool:

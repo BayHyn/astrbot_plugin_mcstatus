@@ -15,10 +15,13 @@ class mcstatus(Star):
         super().__init__(context)
         self.config = config
         plugin_data_dir = StarTools.get_data_dir("mcstatus")
+        print(plugin_data_dir)
         self.datamanager = DataManager(config_file=plugin_data_dir / "mcstatus.json")
         self.datamanager.load_config()
         self.bot_config = context.get_config()
         self.admin_list = self.bot_config["admins_id"]
+        self.draw_output_path=os.path.join(StarTools.get_data_dir("mcstatus"),'draw_temp.png')
+        
 
     @staticmethod
     def auto_wrap_text(text, max_chars_per_line, keep_original_newlines=True):
@@ -273,7 +276,7 @@ class mcstatus(Star):
             else:
                 yield event.plain_result("❌清空失败，请重试或手动清理")
         elif(subcommand == "help"):
-             drawing = Draw()
+             drawing = Draw(output=self.draw_output_path)
              await drawing.create_image_with_text(text=f"💕MCStatus 插件帮助[v{plugin_version}]\n"
                                      "/motd [服务器地址] (获取服务器MOTD状态信息)\n\n"
                                      "/mcstatus\n"
@@ -284,7 +287,7 @@ class mcstatus(Star):
                                      " ├─ add [名称] [服务器地址] (存储新服务器)\n"
                                      " ├─ del [名称] (删除服务器)\n" 
                                      " └─ clear (删除所有存储服务器，管理员命令)\n",font_size=90,target_size=(1200,620))
-             yield event.image_result(drawing.output)
+             yield event.image_result(self.draw_output_path)
         else:
             yield event.plain_result("❌无相关指令，请输入/mcstatus help查询用法")
 
@@ -305,11 +308,12 @@ class mcstatus(Star):
         line_count = final_text.count('\n')
         if line_count==0:
             line_count+=1
-        drawing = Draw()
-        if (await drawing.create_image_with_text(text=final_text,seted_font=self.config["font"],font_size=60,target_size=(1200,100+60*line_count)))[0]:
-            yield event.image_result(drawing.output)
+        drawing = Draw(output=self.draw_output_path)
+        success, result_path_or_error = await drawing.create_image_with_text(text=final_text,seted_font=self.config["font"],font_size=60,target_size=(1200,100+60*line_count))
+        if success:
+            yield event.image_result(result_path_or_error)
         else:
-            yield event.plain_result("图片生成失败，请检查日志")
+            yield event.plain_result(result_path_or_error)
 
     
     async def terminate(self):

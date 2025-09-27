@@ -1,4 +1,5 @@
 from astrbot.api import logger
+from astrbot.api.star import StarTools
 from PIL import Image, ImageDraw, ImageFont
 import os
 import asyncio
@@ -6,9 +7,9 @@ from typing import List, Tuple
 
 
 class Draw:
-    def __init__(self):
+    def __init__(self,output = f"{StarTools.get_data_dir("mcstatus")}/draw_temp.png"):
         """初始化图片生成器，设置默认输出路径"""
-        self.output = "data/whitecloudcn_plugins_data/draw_temp.png"
+        self.output = output
         os.makedirs(os.path.dirname(self.output), exist_ok=True)
 
     # -------------------- 辅助函数 --------------------
@@ -31,7 +32,7 @@ class Draw:
         获取优先的字体路径列表（存在的才返回）
         """
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        plugin_font_dir = os.path.join("data/plugins/astrbot_plugin_mcstatus/assess")
+        plugin_font_dir = os.path.join(os.path.dirname(__file__), '..', 'assess')
         custom_font_path = os.path.join(plugin_font_dir, seted_font)
 
         candidate = [
@@ -246,7 +247,7 @@ class Draw:
     # -------------------- 主入口 & 快速接口 --------------------
     async def create_image_with_text(self,
                                      text: str,
-                                     background_path: str = "data/plugins/astrbot_plugin_mcstatus/assess/bg.png",
+                                     background_path: str = os.path.join(os.path.dirname(__file__), '..', 'assess', 'bg.png'),
                                      output_path: str = None,
                                      seted_font: str = "cute_font.ttf",
                                      font_size: int = 60,
