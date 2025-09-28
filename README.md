@@ -5,6 +5,7 @@ Author: WhiteCloudCN
 
 # 用法  
 `/mcstatus help/motd/list/look/add/set/del/clear 插件主命令`  
+`/draw [text] 绘制图片`
 
 # TODO
 ❌分群存储  

@@ -255,7 +255,7 @@ class CommandFunc:
                            event: AstrMessageEvent,
                            draw_output_path: str):
         drawing = Draw(output=draw_output_path)
-        await drawing.create_image_with_text(
+        success, result_path_or_error = await drawing.create_image_with_text(
             text=f"💕MCStatus 插件帮助[v{self.plugin_version}]\n"
                   "/mcstatus\n"
                   " ├─ help  ->获取帮助\n"
@@ -267,4 +267,7 @@ class CommandFunc:
                   " └─ clear ->删除所有存储服务器，管理员命令\n"
                   "/draw [text] -> 绘制文本",
                   font_size=90,target_size=(1200,620))
-        return event.image_result(draw_output_path)
+        if success:
+            yield event.image_result(result_path_or_error)
+        else:
+            yield event.plain_result(result_path_or_error)
