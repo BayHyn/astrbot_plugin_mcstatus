@@ -268,6 +268,6 @@ class CommandFunc:
                   "/draw [text] -> 绘制文本",
                   font_size=90,target_size=(1200,620))
         if success:
-            yield event.image_result(result_path_or_error)
+            return event.image_result(result_path_or_error)
         else:
-            yield event.plain_result(result_path_or_error)
+            return event.plain_result(result_path_or_error)
