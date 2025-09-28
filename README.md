@@ -1,11 +1,10 @@
 # Astrbot Plugin MCStatus
-v1.0.1
+v1.0.2
 AstrBot Plugin - MCStatus  
 Author: WhiteCloudCN  
 
 # 用法  
-`/motd ip(:端口) 获取相应服务器地址`  
-`/mcstatus help/motd/list/add/del/clear 插件主命令`  
+`/mcstatus help/motd/list/look/add/set/del/clear 插件主命令`  
 
 # TODO
 ❌分群存储  
