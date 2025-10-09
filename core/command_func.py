@@ -1,15 +1,16 @@
 from astrbot.api.event import AstrMessageEvent
-from astrbot.api import logger
+from astrbot.api import logger, AstrBotConfig
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
 from .data_manager import DataManager
 from .draw import Draw
 
 class CommandFunc:
-    def __init__(self,admin_list: list,datamanager: DataManager,plugin_version: str):
+    def __init__(self,admin_list: list,datamanager: DataManager,plugin_version: str,config: AstrBotConfig):
         self.admin_list = admin_list
         self.datamanager = datamanager
         self.plugin_version = plugin_version
+        self.config = config
         pass
 
     async def get_server_status(self, server_addr: str):
@@ -34,18 +35,36 @@ class CommandFunc:
             import re
             motd = re.sub(r'§[0-9a-fk-or]', '', motd)
 
+            # 获取玩家列表
+            players_list = []
+            if status.players.sample is not None:
+                players_list = [player.name for player in status.players.sample]
+
             return {
                 'server_addr':server_addr,
                 'online': status.players.online,
                 'max': status.players.max,
                 'latency': round(status.latency, 2),
                 'motd': motd,
-                'version': status.version.name
+                'version': status.version.name,
+                'players': players_list  # 添加玩家列表
             }
         except Exception as e:
             logger.error(f"获取服务器状态出错, 原因: {str(e)}")
             return None
-    
+
+    def tras_players_to_string(self, players: list) -> str:
+        if not players:
+            return "无"
+        if len(players) > 20:
+            players = players[:20] + ["...等更多"]
+        res = ""
+        for i in range(1,len(players)):
+            res += f"{players[i-1]}, "
+        res += f"{players[-1]}"
+        return res
+
+
     def to_string(self, server_status: dict) -> str:
         """
         格式化的状态字符串，如果状态数据为None则返回错误信息
@@ -57,13 +76,39 @@ class CommandFunc:
                                   "2. 服务器是否在线\n"
                                   "3. 端口是否正确（默认25565）")
         
+        players_list = self.tras_players_to_string(server_status['players'])
+
         return (
             f"✅ 服务器【{server_status['server_addr']}】状态：\n"
                 f"📋 版本: {server_status['version']}\n"
                 f"👥 玩家: {server_status['online']}/{server_status['max']}\n"
+                f"📋 在线玩家：{players_list}\n"
                 f"📶 延迟: {server_status['latency']}ms\n"
                 f"📝 MOTD: {server_status['motd']}"
         )
+    
+
+    def players_to_string(self, server_status: dict) -> str:
+        """
+        格式化的玩家列表字符串
+        """
+        if server_status is None:
+            return (f"❌ 无法获取服务器的玩家列表\n"
+                    "请检查：\n"
+                    "1. 服务器地址是否正确\n"
+                    "2. 服务器是否在线\n"
+                    "3. 端口是否正确（默认25565）")
+        
+        if not server_status['players']:
+            return (f"🟢 服务器【{server_status['server_addr']}】在线玩家：\n"
+                    f"👥 玩家: {server_status['online']}/{server_status['max']}\n"
+                    "📝 当前没有在线玩家或玩家列表不可见")
+        
+        players_list = self.tras_players_to_string(server_status['players'])
+
+        return (f"🟢 服务器【{server_status['server_addr']}】在线玩家：\n"
+                f"👥 玩家: {server_status['online']}/{server_status['max']}\n"
+                f"📋 玩家列表：\n{players_list}")
     
     @staticmethod
     def auto_wrap_text(text, max_chars_per_line, keep_original_newlines=True):
@@ -176,6 +221,17 @@ class CommandFunc:
                 server_status = await self.get_server_status(server_addr)
                 return event.plain_result(self.to_string(server_status))
 
+    async def _handle_players(self, event: AstrMessageEvent, server_addr: str = None):
+        """
+        Command: /mcstatus players
+        Usage: 获取JE服务器在线玩家列表
+        """
+        if server_addr is None:
+            return event.plain_result("❌格式错误！正确用法：/mcstatus players 服务器地址")
+        else:
+            server_status = await self.get_server_status(server_addr)
+            return event.plain_result(self.players_to_string(server_status))
+
     async def _handle_add(self,
                           event: AstrMessageEvent,
                           server_name: str,
@@ -260,13 +316,14 @@ class CommandFunc:
                   "/mcstatus\n"
                   " ├─ help  ->获取帮助\n"
                   " ├─ motd  ->获取服务器MOTD状态信息\n"
+                  " ├─ players [服务器地址] -> 获取在线玩家列表\n"
                   " ├─ add [名称] [服务器地址] -> 存储新服务器\n"
-                  " ├─ del [名称] -> 删除服务器\n" 
-                  " ├─ look  ->查询服务器名称对应的服务器地址\n"
+                  " ├─ del [名称]  -> 删除服务器\n" 
+                  " ├─ look [名称] ->查询服务器名称对应的服务器地址\n"
                   " ├─ list  ->显示所有已存储服务器，默认显示第一页\n"
-                  " └─ clear ->删除所有存储服务器，管理员命令\n"
+                  " └─ clear ->删除所有存储服务器 *管理员命令\n"
                   "/draw [text] -> 绘制文本",
-                  font_size=90,target_size=(1200,620))
+                  font_size=90,target_size=(1200,680))
         if success:
             return event.image_result(result_path_or_error)
         else:

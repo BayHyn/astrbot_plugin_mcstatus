@@ -12,7 +12,7 @@ class Draw:
         self.output = output
         os.makedirs(os.path.dirname(self.output), exist_ok=True)
 
-    # -------------------- 辅助函数 --------------------
+    # 辅助函数
     def draw_text_with_outline(self, draw: ImageDraw.ImageDraw, x: float, y: float,
                                text: str, font: ImageFont.FreeTypeFont,
                                text_color=(255, 255, 255), outline_color=(0, 0, 0),
@@ -38,8 +38,6 @@ class Draw:
         candidate = [
             custom_font_path,
             # 常见字体/插件自带
-            os.path.join(plugin_font_dir, "simhei.ttf"),
-            os.path.join(plugin_font_dir, "msyh.ttc"),
             "C:/Windows/Fonts/simhei.ttf",
             "C:/Windows/Fonts/msyh.ttc",
             "C:/Windows/Fonts/simsun.ttc",
@@ -158,7 +156,7 @@ class Draw:
                 total_h += spacing
         return max_w, total_h, sizes
 
-    # -------------------- 渲染方法（左上角60,60） --------------------
+    # 渲染方法（左上角60,60）
     async def create_high_quality_image(self, text: str, background: Image.Image, output_path: str,
                                         seted_font: str, font_size: int = 60,
                                         scale_factor: int = 2, spacing: int = 6):
@@ -308,18 +306,13 @@ class Draw:
             logger.error(error_msg)
             return False, error_msg
 
-    async def quick_create(self, text: str, background_path: str = None, output_path: str = None,
-                           seted_font: str = "cute_font.ttf", font_size: int = 60, spacing: int = 4):
-        """快速生成接口（简化参数）"""
-        if background_path is None:
-            background_path = self.output
-
-        return await self.create_image_with_text(
-            text=text,
-            background_path=background_path,
-            output_path=output_path,
-            seted_font=seted_font,
-            font_size=font_size,
-            use_high_quality=len(text) <= 30,
-            spacing=spacing
-        )
+    async def create_motd_image(self,
+                                server_name: str,
+                                server_addr: str,
+                                server_motd: str,
+                                player_num: int,
+                                player_max_num: int,
+                                players: list[str], #在线玩家
+                                ping: int
+                                ):
+        pass

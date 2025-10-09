@@ -6,23 +6,28 @@ from .core.draw import Draw
 from .core.command_func import CommandFunc
 import os
 
-plugin_version = "1.0.2"
+plugin_version = "1.0.3"
 
 @register("mcstatus", "WhiteCloudCN", "一个获取MC服务器状态的插件", plugin_version)
 class mcstatus(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
-        self.config = config
+        self.config = config # 插件配置
         plugin_data_dir = StarTools.get_data_dir("mcstatus")
-        self.bot_config = context.get_config()
-        self.admin_list = self.bot_config["admins_id"]
-        self.draw_output_path=os.path.join(StarTools.get_data_dir("mcstatus"),'draw_temp.png')
+        self.bot_config = context.get_config() # 机器人配置
+        self.admin_list = self.bot_config["admins_id"] # 机器人管理员列表
+        self.draw_output_path=os.path.join(plugin_data_dir,'draw_temp.png')
+        
         self.datamanager = DataManager(config_file=plugin_data_dir / "mcstatus.json")
         self.datamanager.load_config()
-        self.commandFunc = CommandFunc(admin_list=self.admin_list,datamanager=self.datamanager,plugin_version=plugin_version)
+
+        self.commandFunc = CommandFunc(admin_list=self.admin_list,
+                                       datamanager=self.datamanager,
+                                       plugin_version=plugin_version,
+                                       config=self.config)
 
 
-    @filter.command("mcstatus",alias=["mc状态"])
+    @filter.command("mcstatus",alias=["mc状态","MC状态","mcs"])
     async def mcstatus(self,
                        event: AstrMessageEvent,
                        subcommand: str = None,
@@ -35,21 +40,32 @@ class mcstatus(Star):
             case None:
                 yield event.plain_result("❌缺少参数，请输入/mcstatus help查询用法")
             case "motd":
-                yield await self.commandFunc._handle_motd(event=event,server_addr=command_text_a)
+                yield await self.commandFunc._handle_motd(event=event,
+                                                          server_addr=command_text_a)
             case "add":
-                yield await self.commandFunc._handle_add(event=event,server_name=command_text_a,server_addr=command_text_b)
+                yield await self.commandFunc._handle_add(event=event,
+                                                         server_name=command_text_a,
+                                                         server_addr=command_text_b)
+            case "players":
+                yield await self.commandFunc._handle_players(event=event,
+                                                             server_addr=command_text_a)
             case "del":
-                yield await self.commandFunc._handle_del(event=event,server_name=command_text_a)
+                yield await self.commandFunc._handle_del(event=event,
+                                                         server_name=command_text_a)
             case "look":
-                yield await self.commandFunc._handle_look(event=event,server_name=command_text_a)
+                yield await self.commandFunc._handle_look(event=event,
+                                                          server_name=command_text_a)
             case "set":
-                yield await self.commandFunc._handle_set(event=event,server_name=command_text_a,server_addr=command_text_b)
+                yield await self.commandFunc._handle_set(event=event,
+                                                         server_name=command_text_a,
+                                                         server_addr=command_text_b)
             case "list":
                 yield await self.commandFunc._handle_list(event=event)
             case "clear":
                 yield await self.commandFunc._handle_clear(event=event)
             case "help":
-                yield await self.commandFunc._handle_help(event=event,draw_output_path=self.draw_output_path)
+                yield await self.commandFunc._handle_help(event=event,
+                                                          draw_output_path=self.draw_output_path)
             case _:
                 yield event.plain_result("❌无相关指令，请输入/mcstatus help查询用法")
 
@@ -79,4 +95,5 @@ class mcstatus(Star):
 
     
     async def terminate(self):
+        self.datamanager.save_config()
         '''可选择实现 terminate 函数，当插件被卸载/停用时会调用。'''
