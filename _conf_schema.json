@@ -13,7 +13,7 @@
     "obvious_hint": true,
     "items": {
       "enable": {
-        "description": "启用分群存储",
+        "description": "启用分群存储（暂未生效）",
         "type": "bool",
         "hint": "设置是否启用数据分群存储",
         "default": false

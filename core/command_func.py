@@ -13,17 +13,34 @@ class CommandFunc:
         self.config = config
         pass
 
-    async def get_server_status(self, server_addr: str):
+
+    async def _lookup_server(self, server_addr: str):
+        """查询服务器信息"""
         try:
-            if ":" not in server_addr:
-                server_addr = f"{server_addr}:25565"
-            
-            if not self.datamanager.check_server_addr(server_addr):
-                return None
-            
             server = await JavaServer.async_lookup(server_addr)
             status = await server.async_status()
-            
+            return server, status
+        except Exception as e:
+            logger.error(f"查询服务器信息失败, 原因: {str(e)}")
+            return None, None
+
+    async def get_server_status(self, server_addr: str):
+        try:
+            server_addr = server_addr.strip()
+        except Exception as e:
+            logger.error(f"服务器地址格式错误, 原因: {str(e)}")  # 修正了拼写错误
+            return None
+        
+        try:
+            # 尝试直接解析（含SRV）
+            server, status = await self._lookup_server(server_addr)
+            if status is None:
+                if ":" not in server_addr:
+                    # 尝试默认端口25565
+                    server_addr = f"{server_addr}:25565"
+                server, status = await self._lookup_server(server_addr)
+                if status is None:
+                    return None
             if hasattr(status.description, 'to_plain'):
                 motd = status.description.to_plain()
             elif hasattr(status.description, 'to_minecraft'):
@@ -35,23 +52,23 @@ class CommandFunc:
             import re
             motd = re.sub(r'§[0-9a-fk-or]', '', motd)
 
-            # 获取玩家列表
             players_list = []
             if status.players.sample is not None:
                 players_list = [player.name for player in status.players.sample]
 
             return {
-                'server_addr':server_addr,
+                'server_addr': server_addr,
                 'online': status.players.online,
                 'max': status.players.max,
                 'latency': round(status.latency, 2),
                 'motd': motd,
                 'version': status.version.name,
-                'players': players_list  # 添加玩家列表
+                'players': players_list
             }
         except Exception as e:
             logger.error(f"获取服务器状态出错, 原因: {str(e)}")
             return None
+
 
     def tras_players_to_string(self, players: list) -> str:
         if not players:
@@ -238,7 +255,7 @@ class CommandFunc:
                           server_addr: str):
         """
         Command: /mcstatus add
-        Usage: 
+        Usage: 添加服务器
         """
         if server_name is None or server_addr is None:
             return event.plain_result("❌格式错误！正确用法：/mcstatus add [服务器名(任意)] [服务器地址]")
@@ -280,7 +297,7 @@ class CommandFunc:
         if server_name is None or server_addr is None:
             return event.plain_result("❌格式错误！正确用法：/mcstatus set [服务器名] [新服务器地址]")
         else:
-            if self.datamanager.update_server_addr(server_name,server_addr):
+            if self.datamanager.update_server_addr(server_name, server_addr):
                 return event.plain_result(f"{server_name}更新成功，新地址为{server_addr}")
             else:
                 return event.plain_result(f"❌{server_name}更新失败，请检查：\n"

@@ -1,5 +1,5 @@
 # Astrbot Plugin MCStatus
-v1.0.3
+v1.0.4
 AstrBot Plugin - MCStatus  
 Author: WhiteCloudCN  
 
@@ -41,6 +41,9 @@ git clone https://cdn.gh-proxy.com/https://github.com/WhiteCloudOL/astrbot_plugi
 *（2025/10/09）*  
 1. 新增主命令别名：mc状态、MC状态、mcs  
 2. 查询结果新增玩家列表  
+### v1.0.4  
+*(2025/10/10)*  
+1. 添加SRV解析支持  
 
 # TODO
 ❌分群存储  
