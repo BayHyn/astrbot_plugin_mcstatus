@@ -6,7 +6,7 @@ from .core.draw import Draw
 from .core.command_func import CommandFunc
 import os
 
-plugin_version = "1.0.4"
+plugin_version = "1.0.5"
 
 @register("mcstatus", "WhiteCloudCN", "一个获取MC服务器状态的插件", plugin_version)
 class mcstatus(Star):
