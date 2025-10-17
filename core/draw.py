@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 
 class Draw:
-    def __init__(self,output = f"{StarTools.get_data_dir("mcstatus")}/draw_temp.png"):
+    def __init__(self,output = f"{StarTools.get_data_dir('mcstatus')}/draw_temp.png"):
         """初始化图片生成器，设置默认输出路径"""
         self.output = output
         os.makedirs(os.path.dirname(self.output), exist_ok=True)

@@ -50,4 +50,4 @@ git clone https://cdn.gh-proxy.com/https://github.com/WhiteCloudOL/astrbot_plugi
 ❌list分页查询  
 
 # 支持
-[帮助文档](https://astrbot.app)
+[Astrbot帮助文档](https://astrbot.app)
