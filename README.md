@@ -44,6 +44,9 @@ git clone https://cdn.gh-proxy.com/https://github.com/WhiteCloudOL/astrbot_plugi
 ### v1.0.4  
 *(2025/10/10)*  
 1. 添加SRV解析支持  
+### v1.0.5  
+*(2025/10/17)*  
+1.修复：f-String错误导致的插件无法正常  
 
 # TODO
 ❌分群存储  
